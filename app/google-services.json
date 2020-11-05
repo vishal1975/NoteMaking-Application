@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "32540714948",
+    "firebase_url": "https://note-taking-application-357b0.firebaseio.com",
+    "project_id": "note-taking-application-357b0",
+    "storage_bucket": "note-taking-application-357b0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32540714948:android:ce0433db546c64e45da691",
+        "android_client_info": {
+          "package_name": "com.example.note_taking_application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "32540714948-ur32u9cb58qq4tmt8ljo4qg48fpcfutj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_ZqDxHkEvzWCM4lK_VROyvr1w8mKiK4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "32540714948-ur32u9cb58qq4tmt8ljo4qg48fpcfutj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
