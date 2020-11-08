@@ -1,5 +1,6 @@
 package com.example.note_taking_application;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -120,7 +121,7 @@ public void searchSetup(MenuItem item){
     search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String s) {
-
+                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
             return false;
         }
 
