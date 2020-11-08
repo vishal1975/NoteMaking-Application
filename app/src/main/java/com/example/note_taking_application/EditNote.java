@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -41,6 +42,7 @@ public class EditNote extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         fStore = fStore.getInstance();
+        user= FirebaseAuth.getInstance().getCurrentUser();
         spinner = findViewById(R.id.progressBar2);
         //user = FirebaseAuth.getInstance().getCurrentUser();
 

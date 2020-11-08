@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 docRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
-                                        // note deleted
+                                        Toast.makeText(MainActivity.this, "Your Note has been deleted Successfully", Toast.LENGTH_SHORT).show();
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -171,6 +171,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                             }
                         });
+
+                        menu.getMenu().add("Share").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem menuItem) {
+
+                                share(note);
+                                return true;
+                            }
+                        });
+
                         menu.show();
                     }
                 });
@@ -181,8 +191,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
 
+    private void share(Note note) {
+        Intent intent=new Intent(Intent.ACTION_SEND);
+        String content=note.getContent();
+        String title=note.getTitle();
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT,title);
+        intent.putExtra(Intent.EXTRA_TEXT,content);
+        startActivity(Intent.createChooser(intent,"Choose From The Given Application"));
 
-            @Override
+    }
+
+
+    @Override
             public void onBackPressed() {
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
                     drawer.closeDrawer(GravityCompat.START);
@@ -222,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
              else {
                  FirebaseAuth.getInstance().signOut();
                  Toast.makeText(this, "Sucessesfuly Signed Out", Toast.LENGTH_SHORT).show();
-                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                 startActivity(new Intent(getApplicationContext(),Splash.class));
              }
 
             }

@@ -116,7 +116,7 @@ public class Add_Note extends AppCompatActivity {
 
 public void searchSetup(MenuItem item){
     SearchView search= (SearchView) item.getActionView();
-
+    search.setSubmitButtonEnabled(true);
     search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String s) {
