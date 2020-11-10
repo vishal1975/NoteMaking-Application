@@ -34,6 +34,7 @@ public class Register extends AppCompatActivity {
     ProgressBar progressBar;
     FirebaseFirestore fStore;
     String userID;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class Register extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 final String email = mEmail.getText().toString().trim();
-                String password = mPassword.getText().toString().trim();
+                 password = mPassword.getText().toString().trim();
                 final String fullName = mFullName.getText().toString();
                 final String confirmPassword   = mconfirmPassword.getText().toString();
 
@@ -90,7 +91,9 @@ public class Register extends AppCompatActivity {
                     @Override
                     public void onSuccess(AuthResult authResult) {
                         Toast.makeText(Register.this, "Notes are Synced", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(Register.this,MainActivity.class));
+                        Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+                        intent.putExtra("password",password);
+                        startActivity(intent);
                         finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -111,5 +114,9 @@ public class Register extends AppCompatActivity {
             finish();
         }
         return true;
+    }
+
+    public String getPassword(){
+        return password;
     }
 }

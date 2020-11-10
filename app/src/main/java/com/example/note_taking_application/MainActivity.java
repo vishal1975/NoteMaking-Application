@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,6 +36,7 @@ import com.example.note_taking_application.model.Note;
 //import com.example.note_taking_application.Add_Note;
 //import com.example.note_taking_application.EditNote;
 //import com.example.note_taking_application.NoteDetails;
+import com.example.note_taking_application.security.Decryption;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -59,13 +61,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseAuth fauth;
     FirebaseUser user;
     FirestoreRecyclerAdapter<Note,NoteViewHolder> noteAdapter;
-
+    Intent data;
 
    // int code;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        data=getIntent();
            user=FirebaseAuth.getInstance().getCurrentUser();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -86,7 +89,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fabmain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, Add_Note.class));
+                Intent intent=new Intent(MainActivity.this,Add_Note.class);
+                intent.putExtra("password",data.getStringExtra("password"));
+                startActivity(intent);
             }
         });
 
@@ -97,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
                 .setQuery(query, Note.class)
                 .build();
-
+       final Decryption decryption=new Decryption();
         noteAdapter = new FirestoreRecyclerAdapter<Note, NoteViewHolder>(allNotes) {
             @NonNull
             @Override
@@ -110,12 +115,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             protected void onBindViewHolder(@NonNull NoteViewHolder noteViewHolder, int i, @NonNull final Note note) {
 
+                final String docId = noteAdapter.getSnapshots().getSnapshot(i).getId();
+                String decrypted_title=note.getTitle();
+                String decrypted_content=note.getContent();
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        decrypted_title=decryption.decrypt(note.getTitleSalt(),note.getTitle(),note.getTitleiv(),data.getStringExtra("password"));
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        decrypted_content=decryption.decrypt(note.getContentSalt(),note.getContent(),note.getContentiv(),data.getStringExtra("password"));
+                    }
+                    Log.d("yadvendra 50","work it");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                noteViewHolder.noteTitle.setText(note.getTitle());
-                noteViewHolder.noteContent.setText(note.getContent());
+//                noteViewHolder.noteTitle.setText(note.getTitle());
+//                noteViewHolder.noteContent.setText(note.getContent());
+                noteViewHolder.noteTitle.setText(decrypted_title);
+                noteViewHolder.noteContent.setText(decrypted_content);
                 final int code = getRandomColor();
                 noteViewHolder.mCardView.setCardBackgroundColor(noteViewHolder.view.getResources().getColor(code, null));
-                final String docId = noteAdapter.getSnapshots().getSnapshot(i).getId();
+
                 noteViewHolder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
