@@ -62,12 +62,9 @@ public class Register extends AppCompatActivity {
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.progressBar);
-            //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
             getSupportActionBar().setTitle("Create Account");
-//        if(fAuth.getCurrentUser() != null){
-//            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//            finish();
-//        }
+
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,13 +101,13 @@ public class Register extends AppCompatActivity {
                     public void onComplete(Task<AuthResult> task) {
 
                          if(task.isSuccessful()) {
-                             Log.d("yadvendra100","complete");
+
                              SharedPreferences.Editor preferencesEditor = mPreferences.edit();
                              preferencesEditor.putString("password", password);
                              preferencesEditor.apply();
                              Toast.makeText(Register.this, "Notes are Synced", Toast.LENGTH_SHORT).show();
                              Intent intent = new Intent(getApplicationContext(), Login.class);
-                             //intent.putExtra("password",password);
+
                              startActivity(intent);
                              finish();
                          }
@@ -123,20 +120,7 @@ public class Register extends AppCompatActivity {
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-
-
-
-
-
-//        if(item.getItemId()==android.R.id.home){
-//            startActivity(new Intent(getApplicationContext(),MainActivity.class));
-//            finish();
-//        }
-        return super.onOptionsItemSelected(item);
-    }
 
     public String getPassword(){
         return password;

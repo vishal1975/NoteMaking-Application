@@ -56,6 +56,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -343,13 +344,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             protected void onStart() {
                 super.onStart();
                 noteAdapter1.startListening();
-                if(noteAdapter1!=null){
-                    Toast.makeText(this, "helllo", Toast.LENGTH_LONG).show();
-                }
 
-                else {
-                    Toast.makeText(this, "I Think NoteAdapter is Null", Toast.LENGTH_LONG).show();
-                }
             }
 
             @Override

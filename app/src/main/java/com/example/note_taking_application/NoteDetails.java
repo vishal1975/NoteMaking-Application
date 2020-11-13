@@ -45,6 +45,7 @@ public class NoteDetails extends AppCompatActivity {
                 i.putExtra("noteId",data.getStringExtra("noteId"));
                 i.putExtra("code",data.getIntExtra("code",0));
                 startActivity(i);
+                finish();
             }
         });
     }
