@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -16,13 +18,18 @@ import android.widget.Toast;
 
 import com.example.note_taking_application.MainActivity;
 import com.example.note_taking_application.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 public class Register extends AppCompatActivity {
 
@@ -35,23 +42,27 @@ public class Register extends AppCompatActivity {
     FirebaseFirestore fStore;
     String userID;
     String password;
+    private SharedPreferences mPreferences;
+    private String sharedPrefFile =
+            "com.example.note_taking_application";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
         mFullName   = findViewById(R.id.userName);
         mEmail      = findViewById(R.id.userEmail);
         mPassword   = findViewById(R.id.password);
-        mconfirmPassword     = findViewById(R.id.passwordConfirm);
+        mconfirmPassword    = findViewById(R.id.passwordConfirm);
         mRegisterBtn= findViewById(R.id.createAccount);
         mLoginBtn   = findViewById(R.id.login);
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.progressBar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Create Account");
 //        if(fAuth.getCurrentUser() != null){
 //            startActivity(new Intent(getApplicationContext(), MainActivity.class));
@@ -62,6 +73,7 @@ public class Register extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Register.this,Login.class));
+                finish();
             }
         });
         mRegisterBtn.setOnClickListener(new View.OnClickListener() {
@@ -86,20 +98,25 @@ public class Register extends AppCompatActivity {
                     mPassword.setError("Password Must be >= 6 Characters");
                     return;
                 }
-                AuthCredential credential= EmailAuthProvider.getCredential(email,password);
-                fAuth.getCurrentUser().linkWithCredential(credential).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+               // AuthCredential credential= EmailAuthProvider.getCredential(email,password);
+                fAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onSuccess(AuthResult authResult) {
-                        Toast.makeText(Register.this, "Notes are Synced", Toast.LENGTH_SHORT).show();
-                        Intent intent=new Intent(getApplicationContext(),MainActivity.class);
-                        intent.putExtra("password",password);
-                        startActivity(intent);
-                        finish();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(Register.this, "Please try Again...", Toast.LENGTH_SHORT).show();
+                    public void onComplete(Task<AuthResult> task) {
+
+                         if(task.isSuccessful()) {
+                             Log.d("yadvendra100","complete");
+                             SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+                             preferencesEditor.putString("password", password);
+                             preferencesEditor.apply();
+                             Toast.makeText(Register.this, "Notes are Synced", Toast.LENGTH_SHORT).show();
+                             Intent intent = new Intent(getApplicationContext(), Login.class);
+                             //intent.putExtra("password",password);
+                             startActivity(intent);
+                             finish();
+                         }
+                         else{
+                             Toast.makeText(Register.this, "Please try Again...", Toast.LENGTH_SHORT).show();
+                         }
                     }
                 });
             }
@@ -109,11 +126,16 @@ public class Register extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        if(item.getItemId()==android.R.id.home){
-            startActivity(new Intent(getApplicationContext(),MainActivity.class));
-            finish();
-        }
-        return true;
+
+
+
+
+
+//        if(item.getItemId()==android.R.id.home){
+//            startActivity(new Intent(getApplicationContext(),MainActivity.class));
+//            finish();
+//        }
+        return super.onOptionsItemSelected(item);
     }
 
     public String getPassword(){

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -38,14 +39,20 @@ public class Login extends AppCompatActivity {
     ProgressBar progressBar;
     FirebaseAuth fAuth;
 
-
+    private SharedPreferences mPreferences;
+    private String sharedPrefFile =
+            "com.example.note_taking_application";
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+
+
+      //  Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Log In To Account");
 
 
@@ -62,7 +69,7 @@ public class Login extends AppCompatActivity {
 
 
                 String email = mEmail.getText().toString();
-                String password = mPassword.getText().toString();
+                final String password = mPassword.getText().toString();
 
                 if(TextUtils.isEmpty(email)){
                     mEmail.setError("Email is Required.");
@@ -86,6 +93,10 @@ public class Login extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if(task.isSuccessful()){
+
+                            SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+                            preferencesEditor.putString("password",password);
+                            preferencesEditor.apply();
                             Toast.makeText(Login.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
 
 
@@ -108,6 +119,7 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(),Register.class));
+                finish();
             }
         });
 

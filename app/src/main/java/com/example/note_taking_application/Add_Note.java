@@ -1,6 +1,7 @@
 package com.example.note_taking_application;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -42,6 +43,10 @@ public class Add_Note extends AppCompatActivity {
     ProgressBar progressBarSave;
     FirebaseUser user;
     Intent data;
+    private SharedPreferences mPreferences;
+    private String sharedPrefFile =
+            "com.example.note_taking_application";
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -49,6 +54,7 @@ public class Add_Note extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add__note);
         final Map<String,Object> note = new HashMap<>();
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
         data=getIntent();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,7 +63,7 @@ public class Add_Note extends AppCompatActivity {
 
          user= FirebaseAuth.getInstance().getCurrentUser();
         progressBarSave = findViewById(R.id.progressBar);
-        Log.d("yadvendra 41",data.getStringExtra("password"));
+       // Log.d("yadvendra 41",data.getStringExtra("password"));
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,19 +78,22 @@ public class Add_Note extends AppCompatActivity {
                 String encrypted_content=" ";
                 Encryption encryption=new Encryption();
 
-                Log.d("yadvendra 42",data.getStringExtra("password"));
+                //Log.d("yadvendra 42",data.getStringExtra("password"));
                 try {
-                    HashMap<String, Object> first=encryption.encrypt(data.getStringExtra("password"),ntitle);
+                    HashMap<String, Object> first=encryption.encrypt(mPreferences.getString("password","password"),ntitle);
                      encrypted_title= encoder.encodeToString(( byte[])first.get("ciphertext"));
                      note.put("titleSalt",encoder.encodeToString(( byte[])first.get("salt")));
-
-
-
                      note.put("titleiv",encoder.encodeToString(( byte[])first.get("iv")));
-                    HashMap<String, Object> second=encryption.encrypt(data.getStringExtra("password"),ncontent);
+
+
+
+
+
+                    HashMap<String, Object> second=encryption.encrypt(mPreferences.getString("password","password"),ncontent);
+                    encrypted_content=encoder.encodeToString(( byte[])second.get("ciphertext"));
                     note.put("contentSalt",encoder.encodeToString(( byte[])second.get("salt")));
                    note.put("contentiv",encoder.encodeToString(( byte[])second.get("iv")));
-                    encrypted_content=encoder.encodeToString(( byte[])second.get("ciphertext"));
+
                 } catch (Exception e) {
 
                     e.printStackTrace();

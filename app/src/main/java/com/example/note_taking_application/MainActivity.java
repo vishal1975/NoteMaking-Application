@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 
 import com.example.note_taking_application.auth.Login;
 import com.example.note_taking_application.auth.Register;
+import com.example.note_taking_application.model.FirestoreAdapter;
 import com.example.note_taking_application.model.Note;
 //import com.example.note_taking_application.Add_Note;
 //import com.example.note_taking_application.EditNote;
@@ -39,15 +41,19 @@ import com.example.note_taking_application.model.Note;
 import com.example.note_taking_application.security.Decryption;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,16 +66,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseFirestore fStore;
     FirebaseAuth fauth;
     FirebaseUser user;
-    FirestoreRecyclerAdapter<Note,NoteViewHolder> noteAdapter;
+    //FirestoreRecyclerAdapter<Note, NoteViewHolder> noteAdapter;
     Intent data;
 
-   // int code;
+    FirestoreAdapter noteAdapter1;
+
+    private SharedPreferences mPreferences;
+    private String sharedPrefFile =
+            "com.example.note_taking_application";
+
+    // int code;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        data=getIntent();
-           user=FirebaseAuth.getInstance().getCurrentUser();
+        data = getIntent();
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        user = FirebaseAuth.getInstance().getCurrentUser();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawer = findViewById(R.id.drawer);
@@ -89,133 +102,140 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fabmain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(MainActivity.this,Add_Note.class);
-                intent.putExtra("password",data.getStringExtra("password"));
+                Intent intent = new Intent(MainActivity.this, Add_Note.class);
+                intent.putExtra("password", data.getStringExtra("password"));
                 startActivity(intent);
             }
         });
 
 
         fStore = FirebaseFirestore.getInstance();
-        Query query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
-
-        FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
-                .setQuery(query, Note.class)
-                .build();
-       final Decryption decryption=new Decryption();
-        noteAdapter = new FirestoreRecyclerAdapter<Note, NoteViewHolder>(allNotes) {
-            @NonNull
-            @Override
-            public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_view_layout, parent, false);
-                return new NoteViewHolder(view);
-            }
-
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            @Override
-            protected void onBindViewHolder(@NonNull NoteViewHolder noteViewHolder, int i, @NonNull final Note note) {
-
-                final String docId = noteAdapter.getSnapshots().getSnapshot(i).getId();
-                String decrypted_title=note.getTitle();
-                String decrypted_content=note.getContent();
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        decrypted_title=decryption.decrypt(note.getTitleSalt(),note.getTitle(),note.getTitleiv(),data.getStringExtra("password"));
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        decrypted_content=decryption.decrypt(note.getContentSalt(),note.getContent(),note.getContentiv(),data.getStringExtra("password"));
-                    }
-                    Log.d("yadvendra 50","work it");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-//                noteViewHolder.noteTitle.setText(note.getTitle());
-//                noteViewHolder.noteContent.setText(note.getContent());
-                noteViewHolder.noteTitle.setText(decrypted_title);
-                noteViewHolder.noteContent.setText(decrypted_content);
-                final int code = getRandomColor();
-                noteViewHolder.mCardView.setCardBackgroundColor(noteViewHolder.view.getResources().getColor(code, null));
-
-                noteViewHolder.view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent i = new Intent(v.getContext(), NoteDetails.class);
-                        i.putExtra("title", note.getTitle());
-                        i.putExtra("content", note.getContent());
-                        i.putExtra("code", code);
-                        i.putExtra("noteId", docId);
-                        v.getContext().startActivity(i);
-                    }
-                });
-
-                ImageView menuIcon = noteViewHolder.view.findViewById(R.id.menuIcon);
-
-                menuIcon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-
-                        PopupMenu menu = new PopupMenu(v.getContext(), v);
-                        menu.setGravity(Gravity.END);
-                        menu.getMenu().add("Edit").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                Intent i = new Intent(v.getContext(), EditNote.class);
-                                i.putExtra("title", note.getTitle());
-                                i.putExtra("content", note.getContent());
-                                i.putExtra("noteId", docId);
-                                i.putExtra("code", code);
-                                startActivity(i);
-                                return true;
-                            }
-                        });
 
 
-                        menu.getMenu().add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                DocumentReference docRef = fStore.collection("notes").document(user.getUid()).collection("MyNotes").document(docId);
-                                docRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(MainActivity.this, "Your Note has been deleted Successfully", Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(MainActivity.this, "Error in Deleting Note.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-
-                                return true;
 
 
-                            }
-                        });
 
-                        menu.getMenu().add("Share").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem menuItem) {
+        final Query query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
 
-                                share(note);
-                                return true;
-                            }
-                        });
 
-                        menu.show();
-                    }
-                });
 
-            }
-        };
-                note_list.setAdapter(noteAdapter);
+                            FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
+                                    .setQuery(query, Note.class)
+                                    .build();
+                            final Decryption decryption = new Decryption();
 
-            }
 
-    private void share(Note note) {
+
+
+
+
+
+
+
+
+
+
+
+
+                            noteAdapter1=new FirestoreAdapter(allNotes,mPreferences);
+                            noteAdapter1.setOnclickListner(new FirestoreAdapter.OnItemClickListner() {
+                                @Override
+                                public void OnItemClick(DocumentSnapshot documentSnapshot, int position, final String decypted_title, final String decrypted_content,View v) {
+
+                                    final Note note=documentSnapshot.toObject(Note.class);
+                                    final String docId = documentSnapshot.getId();
+
+
+                                    PopupMenu menu = new PopupMenu(v.getContext(), v);
+                                    menu.setGravity(Gravity.END);
+                                    menu.getMenu().add("Edit").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                        @Override
+                                        public boolean onMenuItemClick(MenuItem item) {
+                                            Intent i = new Intent(getApplicationContext(), EditNote.class);
+                                            i.putExtra("title",decypted_title );
+                                            i.putExtra("content",decrypted_content);
+                                            i.putExtra("noteId", docId);
+
+                                            startActivity(i);
+                                            return true;
+                                        }
+                                    });
+
+
+
+
+
+
+                                    menu.getMenu().add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                        @Override
+                                        public boolean onMenuItemClick(MenuItem item) {
+                                            DocumentReference docRef = fStore.collection("notes").document(user.getUid()).collection("MyNotes").document(docId);
+                                            docRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Toast.makeText(MainActivity.this, "Your Note has been deleted Successfully", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Toast.makeText(MainActivity.this, "Error in Deleting Note.", Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+
+                                            return true;
+
+
+                                        }
+                                    });
+
+
+
+                                    menu.getMenu().add("Share").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                        @Override
+                                        public boolean onMenuItemClick(MenuItem menuItem) {
+
+                                            share(decypted_title,decrypted_content);
+                                            return true;
+                                        }
+                                    });
+
+                                    menu.show();
+
+
+
+
+
+
+
+
+
+                                }
+                            });
+
+
+
+
+
+
+
+
+
+
+
+                            note_list.setAdapter(noteAdapter1);
+
+
+
+
+
+    }
+
+
+
+
+    private void share(String title,String content) {
         Intent intent=new Intent(Intent.ACTION_SEND);
-        String content=note.getContent();
-        String title=note.getTitle();
+
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_SUBJECT,title);
         intent.putExtra(Intent.EXTRA_TEXT,content);
@@ -251,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Toast.makeText(this, "You Already have Account", Toast.LENGTH_SHORT).show();
                         }
                         break;
+
                     default:
                         Toast.makeText(this, "coming soon", Toast.LENGTH_LONG).show();
                 }
@@ -258,42 +279,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             public void checkuser(){
-             if(FirebaseAuth.getInstance().getCurrentUser().isAnonymous()){
-                 displayAlert();
-             }
-             else {
+
                  FirebaseAuth.getInstance().signOut();
+                SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+                preferencesEditor.clear();
+                preferencesEditor.apply();
                  Toast.makeText(this, "Sucessesfuly Signed Out", Toast.LENGTH_SHORT).show();
-                 startActivity(new Intent(getApplicationContext(),Splash.class));
-             }
+                 finish();
+
 
             }
-            public void displayAlert(){
-                AlertDialog.Builder warning=new AlertDialog.Builder(this)
-                        .setTitle("Are You Sure")
-                        .setMessage("You are logged in With Temporary account , Logging Out will Delete your All Note")
-                        .setPositiveButton("Sync Note", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                startActivity(new Intent(getApplicationContext(), Register.class));
-                                finish();
-                            }
-                        })
-                        .setNegativeButton("Log Out", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
-                                user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        startActivity(new Intent(getApplicationContext(),Splash.class));
-                                        finish();
-                                    }
-                                });
-                            }
-                        });
-                warning.show();
-            }
+//            public void displayAlert(){
+//                AlertDialog.Builder warning=new AlertDialog.Builder(this)
+//                        .setTitle("Are You Sure")
+//                        .setMessage("You are logged in With Temporary account , Logging Out will Delete your All Note")
+//                        .setPositiveButton("Sync Note", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                startActivity(new Intent(getApplicationContext(), Register.class));
+//                                finish();
+//                            }
+//                        })
+//                        .setNegativeButton("Log Out", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+//                                user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                    @Override
+//                                    public void onSuccess(Void aVoid) {
+//                                        startActivity(new Intent(getApplicationContext(),Splash.class));
+//                                        finish();
+//                                    }
+//                                });
+//                            }
+//                        });
+//                warning.show();
+//            }
 
             @Override
             public boolean onCreateOptionsMenu(Menu menu) {
@@ -313,54 +334,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-            public class NoteViewHolder extends RecyclerView.ViewHolder {
-                TextView noteTitle, noteContent;
-                View view;
-                CardView mCardView;
-
-                public NoteViewHolder(@NonNull View itemView) {
-                    super(itemView);
-
-                    noteTitle = itemView.findViewById(R.id.titles);
-                    noteContent = itemView.findViewById(R.id.content);
-                    mCardView = itemView.findViewById(R.id.noteCard);
-                    view = itemView;
-                }
-            }
 
 
-            private int getRandomColor() {
 
-                List<Integer> colorCode = new ArrayList<>();
-                colorCode.add(R.color.blue);
-                colorCode.add(R.color.yellow);
-                colorCode.add(R.color.skyblue);
-                colorCode.add(R.color.lightPurple);
-                colorCode.add(R.color.lightGreen);
-                colorCode.add(R.color.gray);
-                colorCode.add(R.color.pink);
-                colorCode.add(R.color.red);
-                colorCode.add(R.color.greenlight);
-                colorCode.add(R.color.notgreen);
-
-                Random randomColor = new Random();
-                int number = randomColor.nextInt(colorCode.size());
-                return colorCode.get(number);
-
-            }
 
 
             @Override
             protected void onStart() {
                 super.onStart();
-                noteAdapter.startListening();
+                noteAdapter1.startListening();
+                if(noteAdapter1!=null){
+                    Toast.makeText(this, "helllo", Toast.LENGTH_LONG).show();
+                }
+
+                else {
+                    Toast.makeText(this, "I Think NoteAdapter is Null", Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
             protected void onStop() {
                 super.onStop();
-                if (noteAdapter != null) {
-                    noteAdapter.stopListening();
+                if (noteAdapter1 != null) {
+                    noteAdapter1.stopListening();
                 }
             }
 

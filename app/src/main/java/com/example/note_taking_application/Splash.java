@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
 
+import com.example.note_taking_application.auth.Login;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -31,22 +32,29 @@ public class Splash extends AppCompatActivity {
                       startActivity(new Intent(getApplicationContext(),MainActivity.class));
                       finish();
                   }
+//                  else{
+//                      fauth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+//                          @Override
+//                          public void onSuccess(AuthResult authResult) {
+//                              Toast.makeText(Splash.this, "You are Logged in as anonymus user", Toast.LENGTH_SHORT).show();
+//                              startActivity(new Intent(getApplicationContext(),MainActivity.class));
+//                              finish();
+//                          }
+//                      }).addOnFailureListener(new OnFailureListener() {
+//                          @Override
+//                          public void onFailure(@NonNull Exception e) {
+//                              Toast.makeText(Splash.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                            finish();
+//                          }
+//                      });
+//                  }
+
                   else{
-                      fauth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                          @Override
-                          public void onSuccess(AuthResult authResult) {
-                              Toast.makeText(Splash.this, "You are Logged in as anonymus user", Toast.LENGTH_SHORT).show();
-                              startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                              finish();
-                          }
-                      }).addOnFailureListener(new OnFailureListener() {
-                          @Override
-                          public void onFailure(@NonNull Exception e) {
-                              Toast.makeText(Splash.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                            finish();
-                          }
-                      });
+                      startActivity(new Intent(getApplicationContext(), Login.class));
+                      finish();
+
                   }
+
 
               }
           },2000);
