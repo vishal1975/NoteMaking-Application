@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,14 +117,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        final Query query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
+         Query query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
 
 
 
                             FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
                                     .setQuery(query, Note.class)
                                     .build();
-                            final Decryption decryption = new Decryption();
+                           // final Decryption decryption = new Decryption();
 
 
 
@@ -290,52 +291,62 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
             }
-//            public void displayAlert(){
-//                AlertDialog.Builder warning=new AlertDialog.Builder(this)
-//                        .setTitle("Are You Sure")
-//                        .setMessage("You are logged in With Temporary account , Logging Out will Delete your All Note")
-//                        .setPositiveButton("Sync Note", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                startActivity(new Intent(getApplicationContext(), Register.class));
-//                                finish();
-//                            }
-//                        })
-//                        .setNegativeButton("Log Out", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
-//                                user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                    @Override
-//                                    public void onSuccess(Void aVoid) {
-//                                        startActivity(new Intent(getApplicationContext(),Splash.class));
-//                                        finish();
-//                                    }
-//                                });
-//                            }
-//                        });
-//                warning.show();
-//            }
+
 
             @Override
             public boolean onCreateOptionsMenu(Menu menu) {
                 MenuInflater menuInflater = getMenuInflater();
-                menuInflater.inflate(R.menu.option_menu, menu);
+                menuInflater.inflate(R.menu.option_menu,menu);
 
-                return super.onCreateOptionsMenu(menu);
+                return true;
             }
 
             @Override
             public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() == R.id.setting) {
-                    Toast.makeText(this, "setting is clicked", Toast.LENGTH_LONG).show();
+                if (item.getItemId() == R.id.search) {
+                    //Toast.makeText(this, "setting is clicked", Toast.LENGTH_LONG).show();
+                    searchSetup(item);
+                    return true;
                 }
                 return super.onOptionsItemSelected(item);
             }
 
 
 
+    public void searchSetup(MenuItem item){
+        SearchView search= (SearchView) item.getActionView();
+        search.setSubmitButtonEnabled(true);
+        search.setQueryHint("Search by title");
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+               // startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Query query;
+                if(s.isEmpty()) {
+                     query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
+
+
+
+                }
+                else{
+                    query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").whereEqualTo("title",s).orderBy("title", Query.Direction.DESCENDING);
+                }
+                FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
+                        .setQuery(query, Note.class)
+                        .build();
+
+                      noteAdapter1.updateOptions(allNotes);
+                return true;
+            }
+        });
+
+
+    }
 
 
 
