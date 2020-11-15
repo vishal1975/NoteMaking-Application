@@ -33,18 +33,33 @@
     </androidx.appcompat.widget.Toolbar>
 
     <EditText
+        android:id="@+id/date"
+        android:layout_width="155dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="44dp"
+        android:drawableLeft="@drawable/ic_baseline_date_range_24"
+        android:drawablePadding="10dp"
+        android:focusable="false"
+        android:hint="Enter Date"
+        android:onClick="set_date"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"></EditText>
+
+    <EditText
         android:id="@+id/editNoteContent"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_margin="10dp"
         android:backgroundTint="@android:color/transparent"
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/date" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

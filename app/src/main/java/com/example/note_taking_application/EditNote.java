@@ -5,25 +5,34 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.note_taking_application.security.Encryption;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.sql.Timestamp;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +47,15 @@ public class EditNote extends AppCompatActivity {
     private SharedPreferences mPreferences;
     private String sharedPrefFile =
             "com.example.note_taking_application";
+
+    EditText date;
+
+    private Calendar c;
+    private Date date1;
+    Timestamp ts;
+    String selected_date;
+    Map<String,Object> note;
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -54,17 +72,50 @@ public class EditNote extends AppCompatActivity {
         //user = FirebaseAuth.getInstance().getCurrentUser();
 
         data = getIntent();
-
-
+       c=Calendar.getInstance();
+        note = new HashMap<>();
+        final DocumentReference docref = fStore.collection("notes").document(user.getUid()).collection("MyNotes").document(data.getStringExtra("noteId"));
         editNoteContent = findViewById(R.id.editNoteContent);
         editNoteTitle = findViewById(R.id.editNoteTitle);
+        date=findViewById(R.id.date);
 
+        selected_date=data.getStringExtra("date");
+
+       // Log.d("yadvendra500",selected_date);
 
         String noteTitle = data.getStringExtra("title");
         String noteContent = data.getStringExtra("content");
 
         editNoteTitle.setText(noteTitle);
         editNoteContent.setText(noteContent);
+        date.setText(selected_date);
+        // putting default date
+
+        note.put("date",selected_date);
+
+
+
+        c=Calendar.getInstance();
+        ts=new Timestamp(new Date().getTime());
+        // putting default timestamp
+
+       docref.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+           @Override
+           public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+               if(task.isSuccessful()){
+                   DocumentSnapshot document=task.getResult();
+                   note.put("timeStamp",document.get("timeStamp"));
+               }
+               else{
+                   note.put("timeStamp",ts.getTime());
+               }
+
+           }
+       });
+
+
+
+
 
 
         FloatingActionButton fab = findViewById(R.id.saveEditedNote);
@@ -85,10 +136,10 @@ public class EditNote extends AppCompatActivity {
                 }
                 spinner.setVisibility(View.VISIBLE);
 
-                DocumentReference docref = fStore.collection("notes").document(user.getUid()).collection("MyNotes").document(data.getStringExtra("noteId"));
-                Map<String,Object> note = new HashMap<>();
+                //DocumentReference docref = fStore.collection("notes").document(user.getUid()).collection("MyNotes").document(data.getStringExtra("noteId"));
+              //  Map<String,Object> note = new HashMap<>();
 
-
+                  //docref.
                 String encrypted_title=" ";
                 String encrypted_content=" ";
                 Encryption encryption=new Encryption();
@@ -149,6 +200,37 @@ public class EditNote extends AppCompatActivity {
 
 
 
+
+
+    }
+
+    public void set_date(View view) {
+
+
+        int mYear = c.get(Calendar.YEAR);
+        int mMonth = c.get(Calendar.MONTH);
+        int mDay = c.get(Calendar.DAY_OF_MONTH);
+        //  c.
+
+        final DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+
+                        selected_date=dayOfMonth + "/" + (monthOfYear + 1) + "/" + year;
+                        note.put("date",selected_date);
+                        c.set(year,monthOfYear + 1,dayOfMonth);
+                        Date date1=c.getTime();
+                        ts=new Timestamp(date1.getTime());
+                        note.put("timeStamp",ts.getTime());
+
+                        date.setText(selected_date);
+
+                    }
+                }, mYear, mMonth, mDay);
+        datePickerDialog.show();
 
 
     }

@@ -9,14 +9,18 @@ public class Note {
     String titleiv;
     String contentSalt;
     String contentiv;
+    String date;
+    long timeStamp;
     public Note(){}
-    public Note(String title,String content,String titleSalt,String titleiv,String contentSalt,String contentiv){
+    public Note(String title,String content,String titleSalt,String titleiv,String contentSalt,String contentiv,String date,long timeStamp){
         this.title = title;
         this.content = content;
         this.titleSalt=titleSalt;
         this.titleiv=titleiv;
         this.contentSalt=contentSalt;
         this.contentiv=contentiv;
+        this.date=date;
+        this.timeStamp=timeStamp;
     }
 
     public String getTitle() {
@@ -65,5 +69,21 @@ public class Note {
 
     public void setContentiv(String contentiv) {
         this.contentiv = contentiv;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }

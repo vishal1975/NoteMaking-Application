@@ -28,12 +28,13 @@ public class NoteDetails extends AppCompatActivity {
         TextView note_details=findViewById(R.id.note_details);
         TextView note_details_title=findViewById(R.id.note_details_title);
 
-
+        TextView date=findViewById(R.id.date);
+        date.setText("Created on "+data.getStringExtra("date"));
         note_details.setMovementMethod(new ScrollingMovementMethod());
         note_details.setText(data.getStringExtra("content"));
         note_details_title.setText(data.getStringExtra("title"));
         note_details.setBackgroundColor(getResources().getColor(data.getIntExtra("code",0),null));
-
+        date.setBackgroundColor(getResources().getColor(data.getIntExtra("code",0),null));
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -44,6 +45,7 @@ public class NoteDetails extends AppCompatActivity {
                 i.putExtra("content",data.getStringExtra("content"));
                 i.putExtra("noteId",data.getStringExtra("noteId"));
                 i.putExtra("code",data.getIntExtra("code",0));
+                i.putExtra("date",data.getStringExtra("date"));
                 startActivity(i);
                 finish();
             }

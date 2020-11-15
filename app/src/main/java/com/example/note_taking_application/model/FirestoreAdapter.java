@@ -60,6 +60,7 @@ public class FirestoreAdapter extends FirestoreRecyclerAdapter<Note, FirestoreAd
         final String docId = getSnapshots().getSnapshot(i).getId();
         noteViewHolder.noteTitle.setText(noteViewHolder.decrypted_title_body());
         noteViewHolder.noteContent.setText(noteViewHolder.decrypted_content_body());
+        noteViewHolder.date.setText("Created on "+note.getDate());
         final int code = getRandomColor();
         noteViewHolder.mCardView.setCardBackgroundColor(noteViewHolder.view.getResources().getColor(code, null));
 
@@ -72,6 +73,7 @@ public class FirestoreAdapter extends FirestoreRecyclerAdapter<Note, FirestoreAd
                 i.putExtra("content",noteViewHolder.decrypted_content_body());
                 i.putExtra("code", code);
                 i.putExtra("noteId", docId);
+                i.putExtra("date",note.getDate());
                 v.getContext().startActivity(i);
             }
         });
@@ -88,7 +90,7 @@ public class FirestoreAdapter extends FirestoreRecyclerAdapter<Note, FirestoreAd
 
     public class NoteViewHolder extends RecyclerView.ViewHolder {
 
-        TextView noteTitle, noteContent;
+        TextView noteTitle, noteContent,date;
         View view;
         CardView mCardView;
         ImageView menuicon;
@@ -98,6 +100,7 @@ public class FirestoreAdapter extends FirestoreRecyclerAdapter<Note, FirestoreAd
 
             noteTitle = itemView.findViewById(R.id.titles);
             noteContent = itemView.findViewById(R.id.content);
+            date=itemView.findViewById(R.id.date);
             mCardView = itemView.findViewById(R.id.noteCard);
             menuicon=itemView.findViewById(R.id.menuIcon);
             view = itemView;

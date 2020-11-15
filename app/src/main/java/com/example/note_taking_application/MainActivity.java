@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-         Query query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
+         Query query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("timeStamp", Query.Direction.ASCENDING);
 
 
 
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                             i.putExtra("title",decypted_title );
                                             i.putExtra("content",decrypted_content);
                                             i.putExtra("noteId", docId);
-
+                                            i.putExtra("date",note.getDate());
                                             startActivity(i);
                                             return true;
                                         }
@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void searchSetup(MenuItem item){
         SearchView search= (SearchView) item.getActionView();
         search.setSubmitButtonEnabled(true);
-        search.setQueryHint("Search by title");
+        search.setQueryHint("Search by dd/mm/yyyy");
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
@@ -328,13 +328,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextChange(String s) {
                 Query query;
                 if(s.isEmpty()) {
-                     query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("title", Query.Direction.DESCENDING);
+                     query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").orderBy("timeStamp", Query.Direction.ASCENDING);
 
 
 
                 }
                 else{
-                    query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").whereEqualTo("title",s).orderBy("title", Query.Direction.DESCENDING);
+                    query = fStore.collection("notes").document(user.getUid()).collection("MyNotes").whereEqualTo("date",s).orderBy("timeStamp", Query.Direction.ASCENDING);
                 }
                 FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
                         .setQuery(query, Note.class)

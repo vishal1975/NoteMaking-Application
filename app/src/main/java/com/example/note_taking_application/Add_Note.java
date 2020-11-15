@@ -1,5 +1,6 @@
 package com.example.note_taking_application;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -25,13 +26,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -47,17 +54,45 @@ public class Add_Note extends AppCompatActivity {
     private String sharedPrefFile =
             "com.example.note_taking_application";
 
+    EditText date;
 
+    private Calendar c;
+    private Date date1;
+    Timestamp ts;
+    String selected_date;
+    Map<String,Object> note;
+
+    private int year, month, day;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add__note);
-        final Map<String,Object> note = new HashMap<>();
+        note = new HashMap<>();
         mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
         data=getIntent();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        date=findViewById(R.id.date);
+
+
+
+            // calendar
+
+        c=Calendar.getInstance();
+        ts=new Timestamp(new Date().getTime());
+        int month=c.get(Calendar.MONTH)+1;
+
+        selected_date= c.get(Calendar.DAY_OF_MONTH) +"/"+ month+"/"+ c.get(Calendar.YEAR);
+        note.put("timeStamp",ts.getTime());
+
+        note.put("date",selected_date);
+
+
+
+
+
+
 
 
 
@@ -155,34 +190,43 @@ public class Add_Note extends AppCompatActivity {
         else if(item.getItemId()==R.id.close){
             finish();
         }
-        else if(item.getItemId()==R.id.search){
-            searchSetup(item);
+//        else if(item.getItemId()==R.id.search){
+//            searchSetup(item);
 
 
-        }
+        //}
         return true;
     }
 
-public void searchSetup(MenuItem item){
-    SearchView search= (SearchView) item.getActionView();
-    search.setSubmitButtonEnabled(true);
-    search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-        @Override
-        public boolean onQueryTextSubmit(String s) {
-                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
-            return false;
-        }
-
-        @Override
-        public boolean onQueryTextChange(String s) {
 
 
+    public void set_date(View view) {
+       // final Calendar c = Calendar.getInstance();
+       int mYear = c.get(Calendar.YEAR);
+        int mMonth = c.get(Calendar.MONTH);
+        int mDay = c.get(Calendar.DAY_OF_MONTH);
+      //  c.
 
-            return true;
-        }
-    });
+        final DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+
+                        selected_date=dayOfMonth + "/" + (monthOfYear + 1) + "/" + year;
+                        note.put("date",selected_date);
+                         c.set(year,monthOfYear + 1,dayOfMonth);
+                        Date date1=c.getTime();
+                         ts=new Timestamp(date1.getTime());
+                        note.put("timeStamp",ts.getTime());
+
+                        date.setText(selected_date);
+
+                    }
+                }, mYear, mMonth, mDay);
+          datePickerDialog.show();
 
 
-}
-
+    }
 }
