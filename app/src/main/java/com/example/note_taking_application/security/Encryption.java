@@ -28,7 +28,7 @@ public class Encryption {
         SecureRandom random = new SecureRandom();
         random.nextBytes(salt);
         int count = 1000;
-        // pbeParamSpec = new PBEParameterSpec(salt, count);
+
 
 
         pbeKeySpec = new PBEKeySpec(password.toCharArray(),salt,count,256);

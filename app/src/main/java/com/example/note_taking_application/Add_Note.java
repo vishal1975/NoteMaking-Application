@@ -98,7 +98,7 @@ public class Add_Note extends AppCompatActivity {
 
          user= FirebaseAuth.getInstance().getCurrentUser();
         progressBarSave = findViewById(R.id.progressBar);
-       // Log.d("yadvendra 41",data.getStringExtra("password"));
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +113,7 @@ public class Add_Note extends AppCompatActivity {
                 String encrypted_content=" ";
                 Encryption encryption=new Encryption();
 
-                //Log.d("yadvendra 42",data.getStringExtra("password"));
+
                 try {
                     HashMap<String, Object> first=encryption.encrypt(mPreferences.getString("password","password"),ntitle);
                      encrypted_title= encoder.encodeToString(( byte[])first.get("ciphertext"));

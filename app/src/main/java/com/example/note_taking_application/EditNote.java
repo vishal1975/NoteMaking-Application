@@ -81,7 +81,7 @@ public class EditNote extends AppCompatActivity {
 
         selected_date=data.getStringExtra("date");
 
-       // Log.d("yadvendra500",selected_date);
+
 
         String noteTitle = data.getStringExtra("title");
         String noteContent = data.getStringExtra("content");

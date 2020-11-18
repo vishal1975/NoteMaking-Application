@@ -114,7 +114,7 @@ public class FirestoreAdapter extends FirestoreRecyclerAdapter<Note, FirestoreAd
 
 
                      if(position!=RecyclerView.NO_POSITION&&listner!=null){
-                         Log.d("yadvendra 100","hello");
+
                          listner.OnItemClick(getSnapshots().getSnapshot(position),position,decrypted_title_body(),decrypted_content_body(),v);
                      }
 
